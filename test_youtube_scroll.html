@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Scroll Bug Test</title>
+    <style>
+        body { font-family: sans-serif; margin: 0; padding: 16px; }
+        .spacer { height: 100vh; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #999; font-size: 24px; margin: 16px 0; border-radius: 8px; }
+        .comment { padding: 16px; margin: 16px 0; border: 1px solid #ddd; border-radius: 8px; }
+        .youtube-embed { margin: 16px 0; }
+        .youtube-embed iframe { width: 100%; aspect-ratio: 16/9; border: none; }
+        .buttons { position: fixed; bottom: 16px; left: 16px; right: 16px; display: flex; gap: 8px; z-index: 100; }
+        .buttons button { flex: 1; padding: 16px; font-size: 16px; border: none; border-radius: 8px; color: white; cursor: pointer; }
+        .btn-replace { background: #e74c3c; }
+        .btn-scrollinto { background: #2ecc71; }
+        .btn-scrollto { background: #3498db; }
+        #result { position: fixed; top: 0; left: 0; right: 0; background: #333; color: #fff; padding: 8px 16px; font-size: 14px; z-index: 200; }
+    </style>
+</head>
+<body>
+
+<div id="result">Scroll to top. Then tap a button.</div>
+
+<h1 id="top">YouTube Scroll Bug Test</h1>
+<p>This page tests whether <code>document.location.replace()</code> triggers YouTube app on mobile Firefox when scrolling past a YouTube iframe.</p>
+
+<div class="spacer">⬇ Scroll content above YouTube ⬇</div>
+
+<div class="comment">
+    <p><strong>Comment #1</strong> — just text, no embed</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+</div>
+
+<div class="comment">
+    <p><strong>Comment #2 — with YouTube embed</strong></p>
+    <div class="youtube-embed">
+        <iframe
+            src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0&controls=1"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+        ></iframe>
+    </div>
+</div>
+
+<div class="comment">
+    <p><strong>Comment #3</strong> — more text below YouTube</p>
+    <p>Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+</div>
+
+<div class="spacer">⬇ More scroll content ⬇</div>
+
+<div id="target" class="comment" style="border-color: #e74c3c; border-width: 3px;">
+    <p><strong>🎯 Target Comment</strong> — all buttons scroll here</p>
+    <p>If YouTube app opened during scroll, the bug is confirmed.</p>
+</div>
+
+<div class="spacer">⬇ Bottom padding ⬇</div>
+
+<div class="buttons">
+    <button class="btn-replace" onclick="testLocationReplace()">location.replace()</button>
+    <button class="btn-scrollinto" onclick="testScrollIntoView()">scrollIntoView()</button>
+    <button class="btn-scrollto" onclick="testScrollTo()">scrollTo()</button>
+</div>
+
+<script>
+    const result = document.getElementById('result');
+
+    function testLocationReplace() {
+        result.textContent = '🔴 Using document.location.replace("#target")';
+        document.documentElement.style.scrollBehavior = 'smooth';
+        document.location.replace('#target');
+    }
+
+    function testScrollIntoView() {
+        result.textContent = '🟢 Using el.scrollIntoView({ behavior: "smooth" })';
+        document.getElementById('target').scrollIntoView({ behavior: 'smooth' });
+        history.replaceState(null, null, '#target');
+    }
+
+    function testScrollTo() {
+        result.textContent = '🔵 Using window.scrollTo()';
+        const el = document.getElementById('target');
+        const top = el.getBoundingClientRect().top + window.scrollY;
+        window.scrollTo({ top, behavior: 'smooth' });
+        history.replaceState(null, null, '#target');
+    }
+</script>
+
+</body>
+</html>
